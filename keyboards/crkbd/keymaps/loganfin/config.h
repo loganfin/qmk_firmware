@@ -31,6 +31,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #define QUICK_TAP_TERM_PER_KEY
 #define ONESHOT_TIMEOUT 5000
 #define TAPPING_TERM 200
+#define DOUBLE_TAP_SHIFT_TURNS_ON_CAPS_WORD
 
 #ifdef RGBLIGHT_ENABLE
     #define RGBLIGHT_EFFECT_BREATHING
