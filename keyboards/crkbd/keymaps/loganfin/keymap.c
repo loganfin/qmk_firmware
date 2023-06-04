@@ -118,7 +118,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
 #define HOME_E LALT_T(KC_E)
 #define HOME_U LCTL_T(KC_U)
     #define T_ENT LT(_NUM, KC_ENT)
-    #define T_SFT OSM(MOD_LSFT)
+    #define T_LSFT OSM(MOD_LSFT)
 
     #define HOME_H LCTL_T(KC_H)
     #define HOME_T LALT_T(KC_T)
@@ -126,6 +126,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
     #define HOME_S LT(_SYM, KC_S)
 #define T_BSPC KC_BSPC
 #define T_SPC LT(_NAV, KC_SPC)
+#define T_RSFT TD(TD_RSFT_CAPS)
 
   //,-----------------------------------------------------.                    ,-----------------------------------------------------.
       KC_NO,  KC_QUOT, KC_COMM,  KC_DOT,   KC_P,    KC_Y,                         KC_F,    KC_G,    KC_C,    KC_R,    KC_L,  KC_SLSH,
@@ -134,7 +135,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
   //|--------+--------+--------+--------+--------+--------|                    |--------+--------+--------+--------+--------+--------|
       KC_NO,  KC_SCLN,   KC_Q,    KC_J,    KC_K,    KC_X,                         KC_B,   KC_M,    KC_W,    KC_V,    KC_Z,    KC_NO,
   //|--------+--------+--------+--------+--------+--------+--------|  |--------+--------+--------+--------+--------+--------+--------|
-                                          T_SFT,   T_ENT,   KC_TAB,      T_BSPC,  T_SPC,   T_SFT
+                                          T_LSFT,   T_ENT,   KC_TAB,      T_BSPC,  T_SPC,   T_RSFT
                                       //`--------------------------'  `--------------------------'
 
   ),
@@ -190,7 +191,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
   //|--------+--------+--------+--------+--------+--------|                    |--------+--------+--------+--------+--------+--------|
       KC_NO,   KC_NO,  KC_SLSH,  KC_ASTR, KC_CIRC, KC_GRV,                       KC_TILD,  KC_1,    KC_2,    KC_3,   KC_NO,   KC_NO,
   //|--------+--------+--------+--------+--------+--------+--------|  |--------+--------+--------+--------+--------+--------+--------|
-                                           T_SFT,  KC_TRNS, KC_NO,      KC_BSPC, KC_SPC,   T_SFT
+                                           T_LSFT,  KC_TRNS, KC_NO,      KC_BSPC, KC_SPC,   T_RSFT
                                       //`--------------------------'  `--------------------------'
   ),
 
@@ -214,7 +215,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
   //|--------+--------+--------+--------+--------+--------|                    |--------+--------+--------+--------+--------+--------|
       KC_NO,   KC_NO,  KC_SLSH,  KC_ASTR, KC_CIRC, KC_GRV,                       KC_TILD, KC_DLR, KC_LBRC, KC_RBRC,   KC_NO,  KC_NO,
   //|--------+--------+--------+--------+--------+--------+--------|  |--------+--------+--------+--------+--------+--------+--------|
-                                           T_SFT,  KC_ENT,  KC_TAB,     KC_BSPC, KC_SPC,  T_SFT
+                                           T_LSFT,  KC_ENT,  KC_TAB,     KC_BSPC, KC_SPC,  T_RSFT
                                       //`--------------------------'  `--------------------------'
   ),
 
