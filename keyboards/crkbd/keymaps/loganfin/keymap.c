@@ -55,17 +55,6 @@ enum layer_names {
     _ADJUST
 };
 
-enum {
-    SINGLE_TAP = 1,
-    SINGLE_HOLD = 2,
-    DOUBLE_TAP = 3,
-    DOUBLE_HOLD = 4
-};
-
-enum {
-    SFT_CAPS,
-};
-
 /* tap_hold */
 
 uint16_t get_quick_tap_term(uint16_t keycode, keyrecord_t *record)
@@ -80,12 +69,35 @@ uint16_t get_quick_tap_term(uint16_t keycode, keyrecord_t *record)
 }
 
 /* tap_dance */
+typedef enum {
+    TD_NONE,
+    TD_UNKNOWN,
+    TD_SINGLE_TAP,
+    TD_SINGLE_HOLD,
+    TD_DOUBLE_TAP,
+    TD_DOUBLE_HOLD,
+    TD_DOUBLE_SINGLE_TAP,
+    TD_TRIPLE_TAP,
+    TD_TRIPLE_HOLD
+} td_state_t;
+
+typedef struct {
+    bool is_press_action;
+    td_state_t state;
+} td_tap_t;
+
 enum {
     TD_LSFT_CAPS = 0,
+    TD_RSFT_CAPS,
 };
+
+td_state_t cur_dance(tap_dance_state_t *state);
+void rsft_finished(tap_dance_state_t *state, void *user_data);
+void rsft_reset(tap_dance_state_t *state, void *user_date);
 
 tap_dance_action_t tap_dance_actions[] = {
     [TD_LSFT_CAPS] = ACTION_TAP_DANCE_DOUBLE(KC_LSFT, KC_CAPS),
+    [TD_RSFT_CAPS] = ACTION_TAP_DANCE_FN_ADVANCED(NULL, rsft_finished, rsft_reset),
 };
 
 const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
@@ -358,5 +370,55 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
     set_keylog(keycode, record);
   }
   return true;
+}
+
+td_state_t cur_dance(tap_dance_state_t *state)
+{
+    if (state->count == 1) {
+        if (state->pressed) return TD_SINGLE_HOLD;
+        else return TD_SINGLE_TAP;
+    } else if (state->count == 2) {
+        if (state->pressed) return TD_DOUBLE_HOLD;
+        else return TD_DOUBLE_TAP;
+    }
+    else return TD_UNKNOWN;
+}
+
+static td_tap_t rsfttap_state = {
+    .is_press_action = true,
+    .state = TD_NONE
+};
+
+void rsft_finished(tap_dance_state_t *state, void *user_data)
+{
+    rsfttap_state.state = cur_dance(state);
+    switch (rsfttap_state.state) {
+        case TD_SINGLE_TAP:
+            set_oneshot_mods(MOD_BIT(KC_RSFT));
+            break;
+        case TD_SINGLE_HOLD:
+            register_code(KC_RSFT);
+            break;
+        case TD_DOUBLE_TAP:
+            tap_code(KC_CAPS);
+            break;
+        default:
+            break;
+    }
+}
+
+void rsft_reset(tap_dance_state_t *state, void *user_date)
+{
+    switch (rsfttap_state.state) {
+        case TD_SINGLE_TAP:
+            break;
+        case TD_SINGLE_HOLD:
+            clear_oneshot_mods();
+            unregister_code(KC_RSFT);
+            break;
+        default:
+            break;
+    }
+    rsfttap_state.state = 0;
 }
 #endif // OLED_ENABLE
