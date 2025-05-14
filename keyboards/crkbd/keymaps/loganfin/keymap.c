@@ -1,20 +1,10 @@
 #include QMK_KEYBOARD_H
 #include <stdio.h>
 
-typedef enum {
-    TD_NONE,
-    TD_UNKNOWN,
-    TD_SINGLE_TAP,
-    TD_SINGLE_HOLD,
-    TD_DOUBLE_TAP,
-    TD_DOUBLE_HOLD,
-    TD_DOUBLE_SINGLE_TAP,
-    TD_TRIPLE_TAP,
-    TD_TRIPLE_HOLD
-} td_state_t;
+typedef enum { TD_NONE, TD_UNKNOWN, TD_SINGLE_TAP, TD_SINGLE_HOLD, TD_DOUBLE_TAP, TD_DOUBLE_HOLD, TD_DOUBLE_SINGLE_TAP, TD_TRIPLE_TAP, TD_TRIPLE_HOLD } td_state_t;
 
 typedef struct {
-    bool is_press_action;
+    bool       is_press_action;
     td_state_t state;
 } td_tap_t;
 
@@ -24,8 +14,8 @@ static td_tap_t shift_tap_state = {
 };
 
 td_state_t cur_dance(tap_dance_state_t* state);
-void shift_tap_dance_finished(tap_dance_state_t* state, void* user_data);
-void shift_tap_dance_reset(tap_dance_state_t* state, void* user_data);
+void       shift_tap_dance_finished(tap_dance_state_t* state, void* user_data);
+void       shift_tap_dance_reset(tap_dance_state_t* state, void* user_data);
 
 enum {
     TD_SFT_CAPS = 0,
@@ -63,7 +53,7 @@ tap_dance_action_t tap_dance_actions[] = {
 #define HR_H RCTL_T(KC_H)
 #define HR_T RALT_T(KC_T)
 #define HR_N RGUI_T(KC_N)
-#define LT_S LT(_SYM, KC_SCLN)
+#define LT_S LT(_SYM, KC_S)
 
 ////
 
@@ -77,14 +67,17 @@ tap_dance_action_t tap_dance_actions[] = {
 #define LT_SPC KC_SPC
 #define LF_RSFT TD(TD_SFT_CAPS)
 
+#define SW_QW DF(_QWERTY)
+#define SW_DV DF(_DVORAK)
+
 enum Layers {
     _QWERTY = 0,
     _DVORAK = 1,
     _NUM    = 2,
     _SYM    = 3,
     _FUN    = 4,
-    _QNAV    = 5,
-    _DNAV    = 6,
+    _QNAV   = 5,
+    _DNAV   = 6,
 };
 
 // TODO:
@@ -145,9 +138,9 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
     [_NUM] = LAYOUT_split_3x6_3(
         /*
         ,-----------------------------------------------.                   ,-----------------------------------------------.
-        |       |       |       |       |       |       |                   |   +   |   7   |   8   |   9   |   0   |       |
+        |       |       |       |       |       |       |                   |   +   |   7   |   8   |   9   |   .   |       |
         |-------+-------+-------+-------+-------+-------|                   |-------+-------+-------+-------+-------+-------|
-        |       | _____ |  gui  |  alt  |  ctl  |       |                   |   =   |   4   |   5   |   6   |   .   |       |
+        |       | _____ |  gui  |  alt  |  ctl  |       |                   |   =   |   4   |   5   |   6   |   0   |       |
         |-------+-------+-------+-------+-------+-------|                   |-------+-------+-------+-------+-------+-------|
         |       |       |       |       |       |       |                   |   -   |   1   |   2   |   3   |   _   |       |
         `-------------------------------+-------+-------+-------.   .-------+-------+-------+-------------------------------'
@@ -155,9 +148,9 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
                                         `-----------------------'   `-----------------------'
         */
         //,-----------------------------------------------------.                    ,-----------------------------------------------------.
-            KC_NO,    KC_NO,   KC_NO,   KC_NO,   KC_NO,   KC_NO,                      KC_PLUS,    KC_7,    KC_8,    KC_9,   KC_0,    KC_NO,
+            KC_NO,    KC_NO,   KC_NO,   KC_NO,   KC_NO,   KC_NO,                      KC_PLUS,    KC_7,    KC_8,    KC_9,  KC_DOT,   KC_NO,
         //|--------+--------+--------+--------+--------+--------|                    |--------+--------+--------+--------+--------+--------|
-            KC_NO , KC_TRNS, KC_LGUI, KC_LALT, KC_LCTL,   KC_NO,                       KC_EQL,    KC_4,    KC_5,    KC_6,  KC_DOT,   KC_NO,
+            KC_NO , KC_TRNS, KC_LGUI, KC_LALT, KC_LCTL,   KC_NO,                       KC_EQL,    KC_4,    KC_5,    KC_6,    KC_0,   KC_NO,
         //|--------+--------+--------+--------+--------+--------|                    |--------+--------+--------+--------+--------+--------|
             KC_NO,    KC_NO,   KC_NO,   KC_NO,   KC_NO,   KC_NO,                      KC_MINUS,   KC_1,    KC_2,    KC_3, KC_UNDS,   KC_NO,
         //|--------+--------+--------+--------+--------+--------+--------|  |--------+--------+--------+--------+--------+--------+--------|
@@ -168,21 +161,21 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
         /*
          *
         ,-----------------------------------------------.                   ,-----------------------------------------------.
-        |   \   |   @   |   #   |   {   |   }   |   *   |                   |       |       |       |       |       |       |
+        |   `   |   ^   |   {   |   }   |   $   |   *   |                   |       |       |       |       |       |       |
         |-------+-------+-------+-------+-------+-------|                   |-------+-------+-------+-------+-------+-------|
-        |   |   |   ^   |   $   |   (   |   )   |   &   |                   |       |  ctl  |  alt  |  gui  | _____ |       |
+        |   %   |   @   |   (   |   )   |   &   |   #   |                   |       |  ctl  |  alt  |  gui  | _____ |       |
         |-------+-------+-------+-------+-------+-------|                   |-------+-------+-------+-------+-------+-------|
-        |   `   |   !   |   %   |   [   |   ]   |   ~   |                   |       |       |       |       |       |       |
+        |   \   |   !   |   [   |   ]   |   |   |   ~   |                   |       |       |       |       |       |       |
         `-------+-------+-------+-------+-------+-------+-------.   .-------+-------+-------+-------+-------+-------+-------'
                                         | shift | enter |  tab  |   | bspc  | space | shift |
                                         `-----------------------'   `-----------------------'
         */
         //,-----------------------------------------------------.                    ,-----------------------------------------------------.
-           KC_BSLS,  KC_AT,  KC_HASH, KC_LCBR, KC_RCBR, KC_ASTR,                        KC_NO,   KC_NO,   KC_NO,   KC_NO,   KC_NO,   KC_NO,
+           KC_GRV,  KC_CIRC, KC_LCBR, KC_RCBR,  KC_DLR, KC_ASTR,                        KC_NO,   KC_NO,   KC_NO,   KC_NO,   KC_NO,   KC_NO,
         //|--------+--------+--------+--------+--------+--------|                    |--------+--------+--------+--------+--------+--------|
-           KC_PIPE, KC_CIRC, KC_DLR,  KC_LPRN, KC_RPRN, KC_AMPR,                        KC_NO, KC_RCTL, KC_RALT, KC_RGUI, KC_TRNS,   KC_NO,
+           KC_PERC,  KC_AT,  KC_LPRN, KC_RPRN, KC_AMPR, KC_HASH,                        KC_NO, KC_RCTL, KC_RALT, KC_RGUI, KC_TRNS,   KC_NO,
         //|--------+--------+--------+--------+--------+--------|                    |--------+--------+--------+--------+--------+--------|
-           KC_GRV,  KC_EXLM, KC_PERC, KC_LBRC, KC_RBRC, KC_TILD,                        KC_NO,   KC_NO,   KC_NO,   KC_NO,   KC_NO,   KC_NO,
+           KC_BSLS, KC_EXLM, KC_LBRC, KC_RBRC, KC_PIPE, KC_TILD,                        KC_NO,   KC_NO,   KC_NO,   KC_NO,   KC_NO,   KC_NO,
         //|--------+--------+--------+--------+--------+--------+--------|  |--------+--------+--------+--------+--------+--------+--------|
                                                LF_LSFT,  LT_ENT,  LT_TAB,     LT_BSPC,  LT_SPC, LF_RSFT
                                             //`--------------------------'  `--------------------------'
@@ -209,7 +202,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
                                                 KC_NO,   KC_NO,  KC_TRNS,      KC_NO,   KC_NO,   KC_NO
                                             //`--------------------------'  `--------------------------'
     ),
-    //[_QNAV] = LAYOUT_split_3x6_3(
+    [_QNAV] = LAYOUT_split_3x6_3(
         /*
         ,-----------------------------------------------.                   ,-----------------------------------------------.
         |       |       |       |       |       |       |                   | home  |pgdown | pgup  | end   |       |       |
@@ -221,9 +214,32 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
                                         |       | _____ |       |   |       |       |       |
                                         `-----------------------'   `-----------------------'
         */
-    //),
+        //,-----------------------------------------------------.                    ,-----------------------------------------------------.
+             KC_NO,   SW_QW,   SW_DV,   KC_NO,   KC_NO,   KC_NO,                      KC_HOME, KC_PGDN, KC_PGUP,  KC_END,  KC_NO,   KC_NO,
+        //|--------+--------+--------+--------+--------+--------|                    |--------+--------+--------+--------+--------+--------|
+             KC_NO,   KC_NO, KC_LGUI, KC_LALT, KC_LCTL,   KC_NO,                      KC_LEFT, KC_DOWN,   KC_UP, KC_RIGHT, KC_NO,   KC_NO,
+        //|--------+--------+--------+--------+--------+--------|                    |--------+--------+--------+--------+--------+--------|
+             KC_NO,   KC_NO,   KC_NO,   KC_NO,   KC_NO,   KC_NO,                        KC_NO,   KC_NO,   KC_NO,   KC_NO,  KC_NO,   KC_NO,
+        //|--------+--------+--------+--------+--------+--------+--------|  |--------+--------+--------+--------+--------+--------+--------|
+                                                KC_NO,  KC_TRNS,   KC_NO,      KC_NO,   KC_NO,   KC_NO
+                                            //`--------------------------'  `--------------------------'
+    ),
 };
 // clang-format on
+
+bool qwerty_active = true;
+
+layer_state_t layer_state_set_user(layer_state_t state) {
+    switch (get_highest_layer(state | default_layer_state)) {
+        case _QWERTY:
+            qwerty_active = true;
+            break;
+        case _DVORAK:
+            qwerty_active = false;
+            break;
+    }
+    return state;
+}
 
 uint8_t mod_state = 0;
 
@@ -233,6 +249,7 @@ bool process_record_user(uint16_t keycode, keyrecord_t* record) {
     switch (keycode) {
         case KC_BSPC:
             static bool del_registered = false;
+
             if (record->event.pressed) { // Pressed event
                 if (mod_state & MOD_MASK_SHIFT) {
                     del_mods(MOD_MASK_SHIFT);
@@ -283,7 +300,7 @@ void shift_tap_dance_finished(tap_dance_state_t* state, void* user_data) {
             register_code(KC_LSFT);
             break;
         case TD_DOUBLE_TAP:
-            //tap_code(KC_CAPS);
+            // tap_code(KC_CAPS);
             caps_word_on();
             break;
         default:
@@ -310,11 +327,14 @@ bool caps_word_press_user(uint16_t keycode) {
     switch (keycode) {
         // Keycodes that continue Caps Word, with shift applied.
         case KC_A ... KC_Z:
-            add_weak_mods(MOD_BIT(KC_LSFT));  // Apply shift to next key.
+            add_weak_mods(MOD_BIT(KC_LSFT)); // Apply shift to next key.
             return true;
 
         // Keycodes that continue Caps Word, without shifting.
         case KC_MINS:
+            if (!qwerty_active) {
+                add_weak_mods(MOD_BIT(KC_LSFT)); // Apply shift to next key.
+            }
             return true;
         case KC_1 ... KC_0:
         case KC_BSPC:
@@ -323,6 +343,6 @@ bool caps_word_press_user(uint16_t keycode) {
             return true;
 
         default:
-            return false;  // Deactivate Caps Word.
+            return false; // Deactivate Caps Word.
     }
 }
