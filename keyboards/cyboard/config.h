@@ -30,16 +30,10 @@
 
 #define USB_VBUS_PIN GP27
 
-/* Vial set up */
-//#define VIAL_KEYBOARD_UID {0xC4, 0xCC, 0xB4, 0x76, 0x30, 0x16, 0xFC, 0x70}
-//
-//#define VIAL_UNLOCK_COMBO_ROWS { 10, 10 }
-//#define VIAL_UNLOCK_COMBO_COLS { 3, 4 }
-
 #define DYNAMIC_KEYMAP_LAYER_COUNT 10
 #define DYNAMIC_KEYMAP_MACRO_COUNT 64
 
-//trackball support
+// Trackball support
 #define SPI_DRIVER SPID0
 #define SPI_SCK_PIN GP22
 #define SPI_MISO_PIN GP20
@@ -53,3 +47,8 @@
 #define POINTING_DEVICE_TASK_THROTTLE_MS 1
 #define CHARYBDIS_CONFIG_DUAL_SYNC
 #define PMW3360_LIFTOFF_DISTANCE 0x02 //default 0x02, 2mm liftoff distance
+
+// I2C support
+#define I2C_DRIVER I2CD0
+#define I2C1_SCL_PIN GP25
+#define I2C1_SDA_PIN GP24
