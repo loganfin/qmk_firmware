@@ -1,5 +1,25 @@
 #include QMK_KEYBOARD_H
 
+// Keyamp notes:
+//
+// - Think about adding chording to increase the number of key outputs without increasing the number of layers
+// - Think about switching to laery X from Layer Y without having to go back to the base layer. i.e symbols -> num / num -> symbols
+// - Is one shift key enough? Maybe top left thumb key on left side could be something else and also a MO key.
+// - Add layers to shift keys? Is it understandable to ever have to hold the key down?
+//
+//
+// TODO:
+// - move the symbol layer to a different key? it would be nice if I could hit enter or space while still in the symbol layer
+// - add a question mark to the symbol layer?
+// - only enable vibration on layer changes
+// - replace the _______ with KC_NO to prevent fallthrough
+//
+// - A dedicated underscore key in the symbol layer and disable shifting '-' in capsword
+// - Find a good place for home, end, pg_up, pg_dn
+// auto const foo_arr[] = {2, 3, 4, 5}
+
+#include "drivers/haptic/drv2605l.h"
+
 enum LayerNames {
     _Base,
     _Navigation,
@@ -22,18 +42,24 @@ enum LayerNames {
 #define HR_T RALT_T(KC_T)
 #define HR_N RGUI_T(KC_N)
 
+#define HR_LEFT RGUI_T(KC_LEFT)
+
 //// Thumb cluser
 
 // Common
 #define LF_SFT TD(TD_SFT_CAPS)
 
 // Left
-#define LT_ENT LT(_QNAV, KC_ENT)
+#define LT_ENT LT(_Navigation, KC_ENT)
 #define LT_TAB LT(_FUN, KC_TAB)
 
 // Right
 #define LT_BSPC KC_BSPC
+//#define LT_SPC LT(_Navigation, KC_SPC)
 #define LT_SPC KC_SPC
+
+#define SYM_K LT(_Symbol, KC_K)
+#define SYM_M LT(_Symbol, KC_M)
 
 ////////////////////////////////////////////////////////////////////////////////
 // Tap dance
@@ -70,99 +96,124 @@ enum {
 tap_dance_action_t tap_dance_actions[] = {
     [TD_SFT_CAPS] = ACTION_TAP_DANCE_FN_ADVANCED(NULL, shift_tap_dance_finished, shift_tap_dance_reset),
 };
+
+////////////////////////////////////////////////////////////////////////////////
+// Combos
+const uint16_t PROGMEM angle_brackets_combo[] = {KC_COMM, KC_DOT, COMBO_END};
+// const uint16_t PROGMEM comm_dot_combo[]       = {KC_LABK, KC_RABK, COMBO_END};
+
+// < + > = ?
+// , + . = ?
+combo_t key_combos[] = {
+    COMBO(angle_brackets_combo, KC_QUESTION),
+    // COMBO(comm_dot_combo, KC_QUESTION),
+};
+
 ////////////////////////////////////////////////////////////////////////////////
 // Keymaps
 // clang-format off
 const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
 
+//      ,-----------------------------------------------.             ,-----------------------------------------------.
+//      |       |   `   |   <   |   >   |   -   |       |             |       |   ^   |   {   |   }   |   $   |       |
+//      |-------+-------+-------+-------+-------+-------|             |-------+-------+-------+-------+-------+-------|
+//      |       |   !   |   *   |   /   |   =   |       |             |       |   &   |   (   |   )   |   %   |       |
+//      |-------+-------+-------+-------+-------+-------|             |-------+-------+-------+-------+-------+-------|
+//      |       |   ~   |   +   |   #   |   |   |       |             |       |   @   |   [   |   ]   |   \   |       |
+//      `-------+-------+-------+-------+-------+-------|             |-------+-------+-------+-------+-------+-------'
+//                                   ,-----------------------.   ,-----------------------.
+//                                   |       |       |       |   |       |       |       |
+//                                   `-----------------------'   `-----------------------'
+
+
     [_Base] = LAYOUT_dual_arcs_num(
-        KC_NO,  KC_1,    KC_2,    KC_3,    KC_4,    KC_5,                                KC_6,    KC_7,    KC_8,    KC_9,    KC_0,    KC_MINS,
+        KC_NO,  KC_1,    KC_2,    KC_3,    KC_4,    KC_5,                                KC_6,    KC_7,    KC_8,    KC_9,    KC_0,    KC_NO,
         KC_NO,  KC_QUOT,    KC_COMM,    KC_DOT,    KC_P,    KC_Y,                                KC_F,    KC_G,    KC_C,    KC_R,    KC_L,    KC_NO,
         KC_NO, KC_A,    HR_O,    HR_E,    HR_U,    KC_I,                                KC_D,    HR_H,    HR_T,    HR_N,    KC_S, KC_NO,
-        KC_NO, KC_SCLN,    KC_Q,    KC_J,    KC_K,    KC_X,                                KC_B,    KC_M,    KC_W, KC_V,  KC_Z, KC_NO,
-        KC_NO,   KC_NO, KC_NO,   KC_NO,   LF_SFT, KC_ENT, KC_ESC,           KC_BSPC,  KC_SPC,  LF_SFT, KC_LBRC,  KC_RBRC, KC_LEFT, KC_RIGHT,
-                                                      MO(_Effects),    KC_TAB,           KC_CAPS,  KC_NO
+        KC_NO, KC_SCLN,    KC_Q,    KC_J,    SYM_K,    KC_X,                                KC_B,    SYM_M,    KC_W, KC_V,  KC_Z, KC_NO,
+        KC_NO,   KC_NO, KC_NO,   KC_NO,   LF_SFT, LT_ENT, KC_ESC,           LT_BSPC,  LT_SPC, LF_SFT, KC_NO,  KC_NO, KC_NO, KC_NO,
+                                                      MO(_Function),    KC_NO,           KC_TAB,  MO(_Effects)
     ),
 
     [_Navigation] = LAYOUT_dual_arcs_num(
-        _______, _______, _______, _______, _______, _______,                           _______, _______, _______, _______, _______, _______,
-        _______, _______, _______, _______, _______, _______,                           _______, _______, _______, _______, _______, _______,
-        _______, _______, _______, _______, _______, _______,                           _______, _______, _______, _______, _______, _______,
-        _______, _______, _______, _______, _______, _______,                           _______, _______, _______, _______, _______, _______,
-        _______, _______, _______, _______, _______, _______, _______,         _______, _______, _______, _______, _______, _______, _______,
-                                                     _______, _______,         _______, _______
+        KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO,                           KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO,
+        KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO,                           KC_NO, KC_NO, KC_NO, KC_NO, KC_RIGHT, KC_NO,
+        KC_NO, KC_NO, KC_LGUI, KC_LALT, KC_LCTL, KC_NO,                           KC_NO, HR_LEFT, KC_RALT, KC_RGUI, KC_NO, KC_NO,
+        KC_NO, KC_NO, KC_NO, KC_DOWN, KC_UP, KC_NO,                           KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO,
+        KC_NO,   KC_NO, KC_NO,   KC_NO,   LF_SFT, LT_ENT, KC_ESC,           LT_BSPC,  LT_SPC, LF_SFT, KC_NO,  KC_NO, KC_NO, KC_NO,
+                                                      MO(_Function),    KC_NO,           KC_TAB,  MO(_Effects)
     ),
 
     [_Symbol] = LAYOUT_dual_arcs_num(
-        _______, _______, _______, _______, _______, _______,                           _______, _______, _______, _______, _______, _______,
-        _______, _______, _______, _______, _______, _______,                           _______, KC_HOME, KC_UP,   KC_END,  _______, _______,
-        _______, _______, _______, _______, _______, _______,                           _______, KC_LEFT, KC_DOWN, KC_RIGHT, _______, _______,
-        _______, _______, _______, _______, _______, _______,                           _______, _______, _______, _______, _______, _______,
-        _______, _______, _______, _______, _______, _______, _______,         _______, _______, _______, _______, _______, _______, _______,
-                                                     _______, _______,         _______, _______
+        KC_NO,  KC_1,    KC_2,    KC_3,    KC_4,    KC_5,                                KC_6,    KC_7,    KC_8,    KC_9,    KC_0,    KC_NO,
+        KC_NO, KC_GRV, KC_LABK, KC_RABK, KC_MINS, KC_NO,                           KC_NO, KC_AMPR, KC_LCBR, KC_RCBR, KC_DLR, KC_NO,
+        KC_NO, KC_EXLM, KC_ASTR, KC_SLSH, KC_EQL, KC_NO,                           KC_NO, KC_CIRC, KC_LPRN, KC_RPRN, KC_PERC, KC_NO,
+        KC_NO, KC_TILD, KC_PLUS, KC_HASH, KC_PIPE, KC_NO,                           KC_NO, KC_AT, KC_LBRC, KC_RBRC, KC_BSLS, KC_NO,
+        KC_NO,   KC_NO, KC_NO,   KC_NO,   LF_SFT, LT_ENT, KC_ESC,           LT_BSPC,  LT_SPC, LF_SFT, KC_NO,  KC_NO, KC_NO, KC_NO,
+                                                      MO(_Function),    KC_NO,           KC_TAB,  MO(_Effects)
     ),
 
     [_Function] = LAYOUT_dual_arcs_num(
-        _______, _______, _______, _______, _______, _______,                           _______, _______, _______, _______, _______, _______,
-        _______, _______, _______, _______, _______, _______,                           _______, _______, _______, _______, _______, _______,
-        _______, _______, _______, _______, _______, _______,                           _______, _______, _______, _______, _______, _______,
-        _______, _______, _______, _______, _______, _______,                           _______, _______, _______, _______, _______, _______,
-        _______, _______, _______, _______, _______, _______, _______,         _______, _______, _______, _______, _______, _______, _______,
-                                                     _______, _______,         _______, _______
+        KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO,                           KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO,
+        KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO,                           KC_NO, KC_F7, KC_F8, KC_F9, KC_F10, KC_NO,
+        KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO,                           KC_NO, KC_F4, KC_F5, KC_F6, KC_F11, KC_NO,
+        KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO,                           KC_NO, KC_F1, KC_F2, KC_F3, KC_F12, KC_NO,
+        KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO,         KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO,
+                                                     KC_NO, KC_NO,         KC_NO, KC_NO
     ),
 
     [_Effects] = LAYOUT_dual_arcs_num(
-        _______, _______, _______, _______, _______, _______,                           _______, _______, _______, _______, _______, _______,
-        _______, _______, _______, _______, _______, _______,                           RM_HUED, RM_SATD, RM_SATU, RM_HUEU, _______, _______,
-        _______, _______, _______, _______, RM_TOGG, _______,                           RM_PREV, RM_VALD, RM_VALU, RM_NEXT, _______, _______,
-        _______, _______, _______, _______, _______, _______,                           _______, RM_SPDD, RM_SPDU, _______, _______, _______,
-        _______, _______, _______, _______, _______, _______, _______,         _______, _______, _______, _______, _______, _______, _______,
-                                                     _______, _______,         _______, _______
+        QK_BOOT, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO,                           KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO,
+        KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO,                           RM_HUED, RM_SATD, RM_SATU, RM_HUEU, KC_NO, KC_NO,
+        KC_NO, KC_NO, HF_PREV, KC_NO, KC_NO, HF_NEXT,                           RM_PREV, RM_VALD, RM_VALU, RM_NEXT, KC_NO, KC_NO,
+        KC_NO, KC_NO, HF_TOGG, KC_NO, KC_NO, KC_NO,                           KC_NO, RM_SPDD, RM_SPDU, RM_TOGG, KC_NO, KC_NO,
+        KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO,         KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO,
+                                                     KC_NO, KC_NO,         KC_NO, KC_NO
     ),
 
     [5] = LAYOUT_dual_arcs_num(
-        _______, _______, _______, _______, _______, _______,                           _______, _______, _______, _______, _______, _______,
-        _______, _______, _______, _______, _______, _______,                           _______, _______, _______, _______, _______, _______,
-        _______, _______, _______, _______, _______, _______,                           _______, _______, _______, _______, _______, _______,
-        _______, _______, _______, _______, _______, _______,                           _______, _______, _______, _______, _______, _______,
-        _______, _______, _______, _______, _______, _______, _______,         _______, _______, _______, _______, _______, _______, _______,
-                                                     _______, _______,         _______, _______
+        KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO,                           KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO,
+        KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO,                           KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO,
+        KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO,                           KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO,
+        KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO,                           KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO,
+        KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO,         KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO,
+                                                     KC_NO, KC_NO,         KC_NO, KC_NO
     ),
 
     [6] = LAYOUT_dual_arcs_num(
-        _______, _______, _______, _______, _______, _______,                           _______, _______, _______, _______, _______, _______,
-        _______, _______, _______, _______, _______, _______,                           _______, _______, _______, _______, _______, _______,
-        _______, _______, _______, _______, _______, _______,                           _______, _______, _______, _______, _______, _______,
-        _______, _______, _______, _______, _______, _______,                           _______, _______, _______, _______, _______, _______,
-        _______, _______, _______, _______, _______, _______, _______,         _______, _______, _______, _______, _______, _______, _______,
-                                                     _______, _______,         _______, _______
+        KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO,                           KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO,
+        KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO,                           KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO,
+        KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO,                           KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO,
+        KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO,                           KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO,
+        KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO,         KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO,
+                                                     KC_NO, KC_NO,         KC_NO, KC_NO
     ),
 
     [7] = LAYOUT_dual_arcs_num(
-        _______, _______, _______, _______, _______, _______,                           _______, _______, _______, _______, _______, _______,
-        _______, _______, _______, _______, _______, _______,                           _______, _______, _______, _______, _______, _______,
-        _______, _______, _______, _______, _______, _______,                           _______, _______, _______, _______, _______, _______,
-        _______, _______, _______, _______, _______, _______,                           _______, _______, _______, _______, _______, _______,
-        _______, _______, _______, _______, _______, _______, _______,         _______, _______, _______, _______, _______, _______, _______,
-                                                     _______, _______,         _______, _______
+        KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO,                           KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO,
+        KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO,                           KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO,
+        KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO,                           KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO,
+        KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO,                           KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO,
+        KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO,         KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO,
+                                                     KC_NO, KC_NO,         KC_NO, KC_NO
     ),
 
     [8] = LAYOUT_dual_arcs_num(
-        _______, _______, _______, _______, _______, _______,                           _______, _______, _______, _______, _______, _______,
-        _______, _______, _______, _______, _______, _______,                           _______, _______, _______, _______, _______, _______,
-        _______, _______, _______, _______, _______, _______,                           _______, _______, _______, _______, _______, _______,
-        _______, _______, _______, _______, _______, _______,                           _______, _______, _______, _______, _______, _______,
-        _______, _______, _______, _______, _______, _______, _______,         _______, _______, _______, _______, _______, _______, _______,
-                                                     _______, _______,         _______, _______
+        KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO,                           KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO,
+        KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO,                           KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO,
+        KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO,                           KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO,
+        KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO,                           KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO,
+        KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO,         KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO,
+                                                     KC_NO, KC_NO,         KC_NO, KC_NO
     ),
 
     [9] = LAYOUT_dual_arcs_num(
-        _______, _______, _______, _______, _______, _______,                           _______, _______, _______, _______, _______, _______,
-        _______, _______, _______, _______, _______, _______,                           _______, _______, _______, _______, _______, _______,
-        _______, _______, _______, _______, _______, _______,                           _______, _______, _______, _______, _______, _______,
-        _______, _______, _______, _______, _______, _______,                           _______, _______, _______, _______, _______, _______,
-        _______, _______, _______, _______, _______, _______, _______,         _______, _______, _______, _______, _______, _______, _______,
-                                                     _______, _______,         _______, _______
+        KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO,                           KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO,
+        KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO,                           KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO,
+        KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO,                           KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO,
+        KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO,                           KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO,
+        KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO,         KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO,
+                                                     KC_NO, KC_NO,         KC_NO, KC_NO
     )
 };
 
@@ -189,6 +240,7 @@ bool process_record_user(uint16_t keycode, keyrecord_t* record) {
 
     switch (keycode) {
         case KC_BSPC:
+
             static bool del_registered = false;
 
             if (record->event.pressed) { // Pressed event
@@ -288,3 +340,11 @@ bool caps_word_press_user(uint16_t keycode) {
             return false; // Deactivate Caps Word.
     }
 }
+
+// void keyboard_post_init_user(void) {
+//   // Customise these values to desired behaviour
+//   debug_enable=true;
+//   debug_matrix=true;
+//   debug_keyboard=true;
+//   //debug_mouse=true;
+// }
