@@ -55,7 +55,7 @@ enum LayerNames {
 
 // Right
 #define LT_BSPC KC_BSPC
-//#define LT_SPC LT(_Navigation, KC_SPC)
+// #define LT_SPC LT(_Navigation, KC_SPC)
 #define LT_SPC KC_SPC
 
 #define SYM_K LT(_Symbol, KC_K)
@@ -233,14 +233,15 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
 //     return state;
 // }
 
-uint8_t mod_state = 0;
+uint8_t mod_state         = 0;
+uint8_t oneshot_mod_state = 0;
 
 bool process_record_user(uint16_t keycode, keyrecord_t* record) {
-    mod_state = get_mods();
+    mod_state         = get_mods();
+    oneshot_mod_state = get_oneshot_mods();
 
     switch (keycode) {
         case KC_BSPC:
-
             static bool del_registered = false;
 
             if (record->event.pressed) { // Pressed event
@@ -249,6 +250,12 @@ bool process_record_user(uint16_t keycode, keyrecord_t* record) {
                     register_code(KC_DEL);
                     del_registered = true;
                     set_mods(mod_state);
+                    return false;
+                } else if (oneshot_mod_state & MOD_MASK_SHIFT) {
+                    del_oneshot_mods(MOD_MASK_SHIFT);
+                    register_code(KC_DEL);
+                    del_registered = true;
+                    // We don't need to reset the mod since we've fulfilled the oneshot
                     return false;
                 }
             } else { // Released event
@@ -315,31 +322,31 @@ void shift_tap_dance_reset(tap_dance_state_t* state, void* user_data) {
     shift_tap_state.state = 0;
 }
 
+// I believe I did this because I also had a dedicated underscore key on the symbols layer.
 // Override default implementation to disable shifting of '-'
-bool caps_word_press_user(uint16_t keycode) {
-    switch (keycode) {
-        // Keycodes that continue Caps Word, with shift applied.
-        case KC_A ... KC_Z:
-            add_weak_mods(MOD_BIT(KC_LSFT)); // Apply shift to next key.
-            return true;
-
-        // Keycodes that continue Caps Word, without shifting.
-        case KC_MINS:
-            // I believe I did this because I also had a dedicated underscore key on the symbols layer.
-            // if (!qwerty_active) {
-            // add_weak_mods(MOD_BIT(KC_LSFT)); // Apply shift to next key.
-            //}
-            return true;
-        case KC_1 ... KC_0:
-        case KC_BSPC:
-        case KC_DEL:
-        case KC_UNDS:
-            return true;
-
-        default:
-            return false; // Deactivate Caps Word.
-    }
-}
+// bool caps_word_press_user(uint16_t keycode) {
+//     switch (keycode) {
+//         // Keycodes that continue Caps Word, with shift applied.
+//         case KC_A ... KC_Z:
+//             add_weak_mods(MOD_BIT(KC_LSFT)); // Apply shift to next key.
+//             return true;
+//
+//         // Keycodes that continue Caps Word, without shifting.
+//         case KC_MINS:
+//             // if (!qwerty_active) {
+//             // add_weak_mods(MOD_BIT(KC_LSFT)); // Apply shift to next key.
+//             //}
+//             return true;
+//         case KC_1 ... KC_0:
+//         case KC_BSPC:
+//         case KC_DEL:
+//         case KC_UNDS:
+//             return true;
+//
+//         default:
+//             return false; // Deactivate Caps Word.
+//     }
+// }
 
 // void keyboard_post_init_user(void) {
 //   // Customise these values to desired behaviour
