@@ -19,4 +19,10 @@
 #    define DRV2605L_DEFAULT_MODE DRV2605L_EFFECT_BUZZ_1_100
 
 #    define SPLIT_HAPTIC_ENABLE
+
+#    define NO_HAPTIC_ALPHA
+#    define NO_HAPTIC_PUNCTUATION
+#    define NO_HAPTIC_LOCKKEYS
+#    define NO_HAPTIC_NAV
+#    define NO_HAPTIC_NUMERIC
 #endif

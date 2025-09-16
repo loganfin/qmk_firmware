@@ -26,6 +26,7 @@ enum LayerNames {
     _Symbol,
     _Function,
     _Effects, // LEDs and haptics
+    _Number,
 };
 
 // HR_*: Homerow modifier
@@ -42,7 +43,7 @@ enum LayerNames {
 #define HR_T RALT_T(KC_T)
 #define HR_N RGUI_T(KC_N)
 
-#define HR_LEFT RGUI_T(KC_LEFT)
+#define HR_LEFT RCTL_T(KC_LEFT)
 
 //// Thumb cluser
 
@@ -99,14 +100,14 @@ tap_dance_action_t tap_dance_actions[] = {
 
 ////////////////////////////////////////////////////////////////////////////////
 // Combos
-const uint16_t PROGMEM angle_brackets_combo[] = {KC_COMM, KC_DOT, COMBO_END};
-// const uint16_t PROGMEM comm_dot_combo[]       = {KC_LABK, KC_RABK, COMBO_END};
+const uint16_t PROGMEM comm_dot_combo[] = {KC_COMM, KC_DOT, COMBO_END};
+const uint16_t PROGMEM j_k_combo[]      = {KC_J, SYM_K, COMBO_END};
 
-// < + > = ?
-// , + . = ?
 combo_t key_combos[] = {
-    COMBO(angle_brackets_combo, KC_QUESTION),
-    // COMBO(comm_dot_combo, KC_QUESTION),
+    // , + . = ?
+    COMBO(comm_dot_combo, KC_QUESTION),
+    // j + k = /
+    COMBO(j_k_combo, KC_SLSH),
 };
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -147,7 +148,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
     [_Symbol] = LAYOUT_dual_arcs_num(
         KC_NO,  KC_1,    KC_2,    KC_3,    KC_4,    KC_5,                                KC_6,    KC_7,    KC_8,    KC_9,    KC_0,    KC_NO,
         KC_NO, KC_GRV, KC_LABK, KC_RABK, KC_MINS, KC_NO,                           KC_NO, KC_AMPR, KC_LCBR, KC_RCBR, KC_DLR, KC_NO,
-        KC_NO, KC_EXLM, KC_ASTR, KC_SLSH, KC_EQL, KC_NO,                           KC_NO, KC_CIRC, KC_LPRN, KC_RPRN, KC_PERC, KC_NO,
+        KC_NO, KC_EXLM, KC_ASTR, KC_SLSH, KC_EQL, KC_NO,                           KC_UNDS, KC_CIRC, KC_LPRN, KC_RPRN, KC_PERC, KC_NO,
         KC_NO, KC_TILD, KC_PLUS, KC_HASH, KC_PIPE, KC_NO,                           KC_NO, KC_AT, KC_LBRC, KC_RBRC, KC_BSLS, KC_NO,
         KC_NO,   KC_NO, KC_NO,   KC_NO,   LF_SFT, LT_ENT, KC_ESC,           LT_BSPC,  LT_SPC, LF_SFT, KC_NO,  KC_NO, KC_NO, KC_NO,
                                                       MO(_Function),    KC_NO,           KC_TAB,  MO(_Effects)
@@ -171,13 +172,13 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
                                                      KC_NO, KC_NO,         KC_NO, KC_NO
     ),
 
-    [5] = LAYOUT_dual_arcs_num(
+    [_Number] = LAYOUT_dual_arcs_num(
         KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO,                           KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO,
-        KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO,                           KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO,
-        KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO,                           KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO,
-        KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO,                           KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO,
-        KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO,         KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO,
-                                                     KC_NO, KC_NO,         KC_NO, KC_NO
+        KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO,                           KC_ASTR, KC_7, KC_8, KC_9, KC_SLSH, KC_NO,
+        KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO,                           KC_PERC, KC_4, KC_5, KC_6, KC_DOT, KC_NO,
+        KC_NO, KC_NO, KC_NO, KC_NO, MO(_Symbol), KC_NO,                     KC_PLUS, KC_1, KC_2, KC_3, KC_MINS, KC_NO,
+        KC_NO,   KC_NO, KC_NO,   KC_NO,   LF_SFT, LT_ENT, KC_ESC,           LT_BSPC,  LT_SPC, KC_0, KC_NO,  KC_NO, KC_NO, KC_NO,
+                                                      MO(_Function),    KC_NO,           KC_TAB,  MO(_Effects)
     ),
 
     [6] = LAYOUT_dual_arcs_num(
@@ -322,31 +323,32 @@ void shift_tap_dance_reset(tap_dance_state_t* state, void* user_data) {
     shift_tap_state.state = 0;
 }
 
-// I believe I did this because I also had a dedicated underscore key on the symbols layer.
-// Override default implementation to disable shifting of '-'
-// bool caps_word_press_user(uint16_t keycode) {
-//     switch (keycode) {
-//         // Keycodes that continue Caps Word, with shift applied.
-//         case KC_A ... KC_Z:
-//             add_weak_mods(MOD_BIT(KC_LSFT)); // Apply shift to next key.
-//             return true;
-//
-//         // Keycodes that continue Caps Word, without shifting.
-//         case KC_MINS:
-//             // if (!qwerty_active) {
-//             // add_weak_mods(MOD_BIT(KC_LSFT)); // Apply shift to next key.
-//             //}
-//             return true;
-//         case KC_1 ... KC_0:
-//         case KC_BSPC:
-//         case KC_DEL:
-//         case KC_UNDS:
-//             return true;
-//
-//         default:
-//             return false; // Deactivate Caps Word.
-//     }
-// }
+bool caps_word_press_user(uint16_t keycode) {
+    switch (keycode) {
+        // Keycodes that continue Caps Word, with shift applied.
+        case KC_A ... KC_Z:
+            add_weak_mods(MOD_BIT(KC_LSFT)); // Apply shift to next key.
+            return true;
+
+        // Keycodes that continue Caps Word, without shifting.
+        case KC_MINS:
+            return true;
+        case KC_1 ... KC_0:
+        case KC_BSPC:
+        case KC_DEL:
+        case KC_UNDS:
+            return true;
+
+        default:
+            return false; // Deactivate Caps Word.
+    }
+}
+
+void set_led_indicator(auto color, bool true)
+
+void caps_word_set_user(bool active) {
+    set_led_indicator(LED_CAPS_WORD_ACTIVE, active); // Example custom function
+}
 
 // void keyboard_post_init_user(void) {
 //   // Customise these values to desired behaviour
