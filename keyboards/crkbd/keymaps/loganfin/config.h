@@ -1,0 +1,6 @@
+#pragma once
+
+// #define DYNAMIC_KEYMAP_LAYER_COUNT 10
+#define QUICK_TAP_TERM_PER_KEY
+#define ONESHOT_TIMEOUT 5000
+#define TAPPING_TERM 200
